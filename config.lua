@@ -32,7 +32,10 @@ Config.categories = {
           key = 'medical',
           label = 'Medical',
           icon = 'fa-solid fa-hand-holding-medical',
-          jobs = {}
+          jobs = {
+               allowed_list = { 'ambulance' }, 
+       allowed_grades = {}
+          }
      }
 }
 
@@ -154,6 +157,34 @@ local medial = {
                duration = 3,
                materials = {
                     ["plastic"] = 1,
+               },
+               exp_per_craft = 5
+          }
+     },
+     ['firstaid'] = {
+          categories = {
+               main = 'medical',
+          },
+          item_settings = {
+               label = 'First Aid Kit',
+               image = 'firstaid', -- use inventory's images
+               level = 10,
+               job = {
+                    allowed_list = {'ambulance'},
+                    allowed_grades = {}
+               },
+               -- gang = {
+               --      allowed_list = {},
+               --      allowed_grades = {}
+               -- }
+          },
+          crafting = {
+               success_rate = 100,
+               amount = 1, -- crafted amount
+               duration = 3,
+               materials = {
+                    ["bandage"] = 1,
+                    ["painkillers"] = 1,
                },
                exp_per_craft = 5
           }
@@ -338,6 +369,24 @@ Config.workbenches = {
           },
           categories = { Config.categories.misc, Config.categories.medical },
           recipes = { misc_recipe, medial },
+          radius = 3.0
+     },
+     {
+          table_model = "v_ret_247_pharmbox",
+          coords = vector3(-458.81, -309.77, 34.5),
+          item_show_case_offset = vector3(0.0, 0.0, 1.3),
+          rotation = vector3(0.0, 0.0, 111.4),
+          -- just use either job or gang using both at same time won't work.
+          job = {
+               allowed_list = {'ambulance'},
+               allowed_grades = {}
+          },
+          -- gang = {
+          --      allowed_list = {},
+          --      allowed_grades = {}
+          -- },
+          categories = { Config.categories.medical },
+          recipes = { medial },
           radius = 3.0
      },
      -- gun
