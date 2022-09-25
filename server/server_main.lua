@@ -160,8 +160,11 @@ end)
 RegisterServerEvent('keep-crafting:check_materials_list', function(data)
      local Player = QBCore.Functions.GetPlayer(source)
      local item_config = get_item_data_from_config(data)
+     if not item_config then
+          assert(false, 'failed to get `item_config`')
+          return
+     end
      local level = nil
-
      local gender = Lang:t('info.mr')
      if Player.PlayerData.charinfo.gender == 1 then
           gender = Lang:t('info.mrs')
@@ -210,3 +213,27 @@ RegisterServerEvent('keep-crafting:check_materials_list', function(data)
      end
 
 end)
+
+QBCore.Commands.Add("keepcrafting", "increase exp of crafting for a player", {
+     {
+          name = "cid",
+          help = "player id"
+     },
+     {
+          name = "type",
+          help = "increase/decrease"
+     },
+     {
+          name = "amount",
+          help = "exp"
+     }
+}, true, function(source, args)
+     -- test exp
+     local Type = args[2]:lower()
+     local Player = QBCore.Functions.GetPlayer(tonumber(args[1]))
+     if Type == 'increase' then
+          Player.Functions.SetMetaData("craftingrep", Player.PlayerData.metadata["craftingrep"] + tonumber(args[3]))
+     elseif 'decrease' then
+          Player.Functions.SetMetaData("craftingrep", Player.PlayerData.metadata["craftingrep"] - tonumber(args[3]))
+     end
+end, "admin")

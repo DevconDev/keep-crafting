@@ -237,19 +237,20 @@ function menu:sub_categories(args)
      exports["keep-menu"]:createMenu(Menu)
 end
 
-function menu:crafting_items_list(args)
-     local items = search_for_items_in_category(args[1])
+function menu:crafting_items_list(data)
+     local items = search_for_items_in_category(data[1])
+     local craftingrep = QBCore.Functions.GetPlayerData().metadata.craftingrep
      local Menu = {}
-     if type(args[2]) == "table" then
+     if type(data[2]) == "table" then
           Menu[#Menu + 1] = {
                header = Lang:t("menu.back"),
                back = true,
                args = { 1 },
                action = function()
-                    menu:sub_categories(args[2])
+                    menu:sub_categories(data[2])
                end
           }
-     elseif args[2] == 'main' then
+     elseif data[2] == 'main' then
           Menu[#Menu + 1] = {
                header = Lang:t("menu.back"),
                back = true,
@@ -259,21 +260,38 @@ function menu:crafting_items_list(args)
                end
           }
      end
-
      for item_name, item in pairs(items) do
           item.item_name = item_name -- inject item name into item's data
-          Menu[#Menu + 1] = {
-               header = item.item_settings.label or item_name,
-               icon = item.item_settings.icon or 'fa-solid fa-caret-right',
-               submenu = true,
-               image = item.item_settings.image or nil,
-               args = {
-                    item, args
-               },
-               action = function(item)
-                    menu:crafting_menu(item)
+          -- hide if we set it to hide when players has not reached the level/exp
+          if item.item_settings.hide_until_reaches_level then
+               if craftingrep >= item.item_settings.level then
+                    Menu[#Menu + 1] = {
+                         header = item.item_settings.label or item_name,
+                         icon = item.item_settings.icon or 'fa-solid fa-caret-right',
+                         submenu = true,
+                         image = item.item_settings.image or nil,
+                         args = {
+                              item, data
+                         },
+                         action = function(item)
+                              menu:crafting_menu(item)
+                         end
+                    }
                end
-          }
+          else
+               Menu[#Menu + 1] = {
+                    header = item.item_settings.label or item_name,
+                    icon = item.item_settings.icon or 'fa-solid fa-caret-right',
+                    submenu = true,
+                    image = item.item_settings.image or nil,
+                    args = {
+                         item, data
+                    },
+                    action = function(item)
+                         menu:crafting_menu(item)
+                    end
+               }
+          end
      end
 
      Menu[#Menu + 1] = {
@@ -344,21 +362,6 @@ function menu:crafting_menu(args)
           }
      }
 
-     -- {
-     --      header = "Repair",
-     --      subheader = 'if you already have one and is repairable',
-     --      icon = 'fa-solid fa-screwdriver-wrench',
-     --      args = {
-     --           'repair', item, Workbench.id
-     --      },
-     --      action = function(args)
-     --           TriggerServerEvent('keep-crafting:server:craft_item', {
-     --                type = args[1],
-     --                item = args[2],
-     --                Workbench_id = args[3]
-     --           })
-     --      end
-     -- },
      exports["keep-menu"]:createMenu(Menu)
 
      if item.item_settings.object and next(item.item_settings.object) then
@@ -504,19 +507,21 @@ function QbMenu:sub_categories(args)
      exports["qb-menu"]:openMenu(Menu)
 end
 
-function QbMenu:crafting_items_list(args)
-     local items = search_for_items_in_category(args[1])
+function QbMenu:crafting_items_list(data)
+     local items = search_for_items_in_category(data[1])
+     local craftingrep = QBCore.Functions.GetPlayerData().metadata.craftingrep
      local Menu = {}
-     if type(args[2]) == "table" then
+
+     if type(data[2]) == "table" then
           Menu[#Menu + 1] = {
                header = Lang:t("menu.back"),
                icon = 'fa-solid fa-angle-left',
                params = {
-                    args = args[2],
+                    args = data[2],
                     event = 'keep-crafting:client_lib:sub_categories'
                }
           }
-     elseif args[2] == 'main' then
+     elseif data[2] == 'main' then
           Menu[#Menu + 1] = {
                header = Lang:t("menu.back"),
                icon = 'fa-solid fa-angle-left',
@@ -527,17 +532,32 @@ function QbMenu:crafting_items_list(args)
      end
 
      for item_name, item in pairs(items) do
-          item.item_name = item_name -- inject item name into item's data
-          Menu[#Menu + 1] = {
-               header = item.item_settings.label or item_name,
-               icon = item.item_settings.icon or 'fa-solid fa-caret-right',
-               params = {
-                    args = {
-                         item, args
-                    },
-                    event = 'keep-crafting:client_lib:crafting_menu'
+          item.item_name = item_name
+          if item.item_settings.hide_until_reaches_level then
+               if craftingrep >= item.item_settings.level then
+                    Menu[#Menu + 1] = {
+                         header = item.item_settings.label or item_name,
+                         icon = item.item_settings.icon or 'fa-solid fa-caret-right',
+                         params = {
+                              args = {
+                                   item, data
+                              },
+                              event = 'keep-crafting:client_lib:crafting_menu'
+                         }
+                    }
+               end
+          else
+               Menu[#Menu + 1] = {
+                    header = item.item_settings.label or item_name,
+                    icon = item.item_settings.icon or 'fa-solid fa-caret-right',
+                    params = {
+                         args = {
+                              item, data
+                         },
+                         event = 'keep-crafting:client_lib:crafting_menu'
+                    }
                }
-          }
+          end
      end
 
      Menu[#Menu + 1] = {
